@@ -11,10 +11,9 @@ struct CoinDetailView: View {
     @StateObject var vm: CoinDetailViewModel
     let coin: CoinListItem
     
-    init(container: AppContainer, coin: CoinListItem) {
+    init(coin: CoinListItem) {
         self.coin = coin
-        _vm = StateObject(wrappedValue: container.makeCryptoDetailViewModel(coin: coin))
-        print("CoinDetailView for \(coin.name) initialized")
+        _vm = StateObject(wrappedValue: CoinDetailViewModel(coinId: coin.id))
     }
     
     var body: some View {
@@ -30,7 +29,7 @@ struct CoinDetailView: View {
         }
         .task {
             vm.resetData()
-            await vm.initializeData()
+            await vm.loadDetails()
         }
         .navigationTitle(coin.name)
         .toolbar {
@@ -46,19 +45,12 @@ extension CoinDetailView {
     private var content: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if !vm.filteredChartData.isEmpty  {
-                    ChartView(
-                        selectedRange: $vm.selectedRange,
-                        chartData: vm.filteredChartData,
-                        maxRange: vm.maxRange
-                    )
+                    ChartView(coinId: coin.id)
                     .frame(maxWidth: .infinity)
                     .frame(height: 250)
                     .padding(.bottom, 16)
                     .padding(.horizontal, 0)
-                } else {
-                    ProgressView()
-                }
+
                 Text("Overview")
                     .font(.title)
                     .bold()
@@ -73,7 +65,7 @@ extension CoinDetailView {
 }
 
 #Preview {
-    let container = AppContainer()
+
     let mockCoin = MockData().coin
-    CoinDetailView(container: container, coin: mockCoin)
+    CoinDetailView(coin: mockCoin)
 }

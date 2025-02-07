@@ -9,24 +9,18 @@ import SwiftUI
 
 struct CoordinatorView: View {
     @EnvironmentObject var appCoordinator: AppCoordinator
-    private let container: AppContainer
-    
-    init(container: AppContainer) {
-        print("CoordinatorView rendered")
-        self.container = container
-    }
-    
+   
     var body: some View {
         NavigationStack(path: $appCoordinator.path) {
-            LoginView(container: container)
+            LoginView()
                 .navigationDestination(for: AppPage.self) { page in
                     switch page {
                         case .login:
-                            LoginView(container: container)
+                            LoginView()
                         case .coinList:
-                            CoinsListView(container: container)
+                            CoinsListView()
                         case .coinDetails(coin: let coin):
-                            CoinDetailView(container: container, coin: coin)
+                            CoinDetailView(coin: coin)
                                 
                     }
                 }
@@ -35,9 +29,9 @@ struct CoordinatorView: View {
 }
 
 #Preview {
-    let container = AppContainer()
     let appCoordinator = AppCoordinator()
-    CoordinatorView(container: container)
+    CoordinatorView()
+ 
         .environmentObject(appCoordinator)
 
 }

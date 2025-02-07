@@ -1,10 +1,3 @@
-//
-//  AuthStateManager.swift
-//  CryptoAssessment
-//
-//  Created by ikorobov on 25.12.24..
-//
-
 import Foundation
 import Combine
 
@@ -12,10 +5,6 @@ protocol AuthStateManager {
     var isAuthenticated: Bool { get set }
     func login(username: String, password: String) -> Bool
     func logout()
-}
-
-protocol AuthStateContainer {
-    func makeAuthStateManager() -> AuthStateManager
 }
 
 final class AuthStateManagerImpl: ObservableObject, AuthStateManager {

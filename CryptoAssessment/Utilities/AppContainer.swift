@@ -7,55 +7,44 @@
 import Foundation
 
 final class AppContainer: ObservableObject {
-
+    
+    static let shared = AppContainer()
+    
     private let appCoordinator = AppCoordinator()
     private let userDefaultsManager = UserDefaultsManagerImpl()
     private let networkService = NetworkServiceImpl()
+    private let coinService: CoinService
     
-    func makeAppCoordinator() -> AppCoordinator {
+    private init() {
+        self.coinService = CoinServiceImpl(networkService: networkService)
+    }
+    
+    var coordinator: AppCoordinator {
         appCoordinator
     }
     
-    func makeUserDefaultsManager() -> UserDefaultsManager {
+    var userDefaults: UserDefaultsManager {
         userDefaultsManager
     }
     
-    func makeNetworkService() -> NetworkService {
+    var network: NetworkService {
         networkService
     }
     
-}
-
-extension AppContainer: AuthServiceContainer {
-    func makeAuthService() -> AuthService {
-        AuthServiceImpl()
-    }
-}
-
-extension AppContainer: AuthStateContainer {
-    func makeAuthStateManager() -> AuthStateManager {
-        AuthStateManagerImpl(authService: makeAuthService(), userDefaultsManager: makeUserDefaultsManager())
-    }
-}
-
-extension AppContainer: LoginViewModelContainer {
-    func makeLoginViewModel() -> LoginViewModel {
-        LoginViewModel(authStateManager: makeAuthStateManager(), coordinator: makeAppCoordinator())
-    }
-}
-
-extension AppContainer: @preconcurrency CoinListViewModelContainer {
-    @MainActor func makeCryptoListViewModel() -> CoinListViewModel {
-        CoinListViewModel(networkService: makeNetworkService(),
-                            authStateManager: makeAuthStateManager(),
-                            coordinator: makeAppCoordinator())
-    }
-}
-
-extension AppContainer: @preconcurrency CoinDetailViewModelContainer {
-    @MainActor func makeCryptoDetailViewModel(coin: CoinListItem) -> CoinDetailViewModel {
-        CoinDetailViewModel(networkService: makeNetworkService(), coin: coin)
+    var coins: CoinService {
+        coinService
     }
     
-
+    var authService: AuthService {
+        AuthServiceImpl()
+    }
+    
+    var authStateManager: AuthStateManager {
+        AuthStateManagerImpl(authService: authService,
+                             userDefaultsManager: userDefaultsManager
+        )
+    }
+    
+    
+    
 }

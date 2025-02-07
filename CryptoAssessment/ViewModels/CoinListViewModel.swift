@@ -8,11 +8,6 @@
 import SwiftUI
 import Combine
 
-
-protocol CoinListViewModelContainer {
-    func makeCryptoListViewModel() -> CoinListViewModel
-}
-
 @MainActor
 final class CoinListViewModel: ObservableObject {
 
@@ -25,12 +20,16 @@ final class CoinListViewModel: ObservableObject {
     private var allCoins: [CoinListItem] = []
     private var cancellables: Set<AnyCancellable> = []
     
-    private let networkService: NetworkService
+    private let coinService: CoinService
     private let authStateManager: AuthStateManager
-    private var coordinator: AppCoordinator
+    private let coordinator: AppCoordinator
     
-    init(networkService: NetworkService, authStateManager: AuthStateManager, coordinator: AppCoordinator) {
-        self.networkService = networkService
+    init(
+        coinService: CoinService = AppContainer.shared.coins,
+        authStateManager: AuthStateManager = AppContainer.shared.authStateManager,
+        coordinator: AppCoordinator = AppContainer.shared.coordinator
+    ) {
+        self.coinService = coinService
         self.authStateManager = authStateManager
         self.coordinator = coordinator
         
@@ -41,7 +40,7 @@ final class CoinListViewModel: ObservableObject {
     func fetchCoins(forceRefresh: Bool = false) async {
         state = .loading
         do {
-            let coins = try await networkService.fetchCoins(retryCount: 3, forceRefresh: forceRefresh)
+            let coins = try await coinService.fetchCoins(forceRefresh: forceRefresh)
             self.allCoins = coins
             self.state = .loaded(self.sortCoins(coins, by: self.sortedBy))
         } catch is CancellationError {

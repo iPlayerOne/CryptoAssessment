@@ -8,12 +8,10 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var vm: LoginViewModel
+    @StateObject private var vm = LoginViewModel()
     @State private var showHint: Bool = false
     
-    init(container: AppContainer) {
-        _vm = StateObject(wrappedValue: container.makeLoginViewModel())
-    }
+
     
     var body: some View {
         VStack {
@@ -67,7 +65,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    let container = AppContainer()
-    let vm = container.makeLoginViewModel()
-        LoginView(container: container)
+        LoginView()
 }
