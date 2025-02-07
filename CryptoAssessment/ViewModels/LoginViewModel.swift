@@ -8,9 +8,6 @@
 
 import SwiftUI
 
-protocol LoginViewModelContainer {
-    func makeLoginViewModel() -> LoginViewModel
-}
 
 final class LoginViewModel: ObservableObject {
     @Published var username: String = "" {
@@ -28,7 +25,10 @@ final class LoginViewModel: ObservableObject {
     private let authStateManager: AuthStateManager
     private let coordinator: AppCoordinator
     
-    init(authStateManager: AuthStateManager, coordinator: AppCoordinator) {
+    init(
+        authStateManager: AuthStateManager = AppContainer.shared.authStateManager,
+        coordinator: AppCoordinator = AppContainer.shared.coordinator
+    ) {
         self.authStateManager = authStateManager
         self.coordinator = coordinator
     }

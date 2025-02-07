@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct CoinsListView: View {
-    @StateObject var vm: CoinListViewModel
+    @StateObject private var vm = CoinListViewModel()
     
-    init(container: AppContainer) {
+    init() {
         print("CoinsListView initialized")
-        _vm = StateObject(wrappedValue: container.makeCryptoListViewModel())
     }
     
     var body: some View {
@@ -83,6 +82,5 @@ struct CoinsListView: View {
 }
 
 #Preview {
-    let container = AppContainer()
-    return CoinsListView(container: container)
+    CoinsListView()
 }

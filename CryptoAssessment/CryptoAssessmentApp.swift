@@ -9,19 +9,22 @@ import SwiftUI
 
 @main
 struct CryptoAssessmentApp: App {
-    private let container = AppContainer()
-    private let appCoordinator: AppCoordinator
+    @StateObject private var appCoordinator: AppCoordinator
 
         init() {
-            let authStateManager = container.makeAuthStateManager()
-            self.appCoordinator = container.makeAppCoordinator()
-            self.appCoordinator.initialize(isAuthenticated: authStateManager.isAuthenticated)
+            let container = AppContainer.shared
+            let authStateManager = container.authStateManager
+            let coordinator = container.coordinator
+            coordinator.initialize(isAuthenticated: authStateManager.isAuthenticated)
+            
+            _appCoordinator = StateObject(wrappedValue: coordinator)
         }
     
     var body: some Scene {
         WindowGroup {
-            CoordinatorView(container: container)
+            CoordinatorView()
                 .environmentObject(appCoordinator)
+                
         }
     }
 }

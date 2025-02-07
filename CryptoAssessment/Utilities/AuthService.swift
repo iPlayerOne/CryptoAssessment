@@ -9,10 +9,6 @@ protocol AuthService {
     func validate(username: String, password: String) -> Bool
 }
 
-protocol AuthServiceContainer {
-    func makeAuthService() -> AuthService
-}
-
 final class AuthServiceImpl: AuthService {
     func validate(username: String, password: String) -> Bool {
         username == "qwerty" && password == "qwerty"
