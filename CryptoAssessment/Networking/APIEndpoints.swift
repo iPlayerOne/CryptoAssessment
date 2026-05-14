@@ -9,7 +9,18 @@ import Foundation
 
 struct API {
     static let baseURL = "https://api.coingecko.com/api/v3/"
-    static let apiKey = "CG-Xztp812YU11NEoD9aXH7AWqe"
+    static var apiKey: String? {
+        let key = Bundle.main.object(forInfoDictionaryKey: "COINGECKO_API_KEY") as? String
+            ?? ProcessInfo.processInfo.environment["COINGECKO_API_KEY"]
+        guard let key else { return nil }
+        
+        let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty, !trimmedKey.hasPrefix("$(") else {
+            return nil
+        }
+        
+        return trimmedKey
+    }
     
     struct Endpoints {
         static let coins = "coins"

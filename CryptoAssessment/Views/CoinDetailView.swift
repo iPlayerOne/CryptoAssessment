@@ -18,7 +18,21 @@ struct CoinDetailView: View {
     
     var body: some View {
         VStack {
-            if vm.coinDetails == nil {
+            if let errorMessage = vm.errorMessage {
+                VStack(spacing: 12) {
+                    Text(errorMessage)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("Retry") {
+                        vm.resetData()
+                        Task {
+                            await vm.loadDetails()
+                        }
+                    }
+                }
+                .padding()
+            } else if vm.coinDetails == nil {
                 VStack {
                     ProgressView("Loading...")
                         .padding()
@@ -28,7 +42,6 @@ struct CoinDetailView: View {
             }
         }
         .task {
-            vm.resetData()
             await vm.loadDetails()
         }
         .navigationTitle(coin.name)

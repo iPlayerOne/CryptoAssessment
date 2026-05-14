@@ -8,7 +8,6 @@
 import SwiftUI
 
 enum AppPage: Hashable {
-    case login
     case coinList
     case coinDetails(coin: CoinListItem)
 }
@@ -18,35 +17,38 @@ final class AppCoordinator: ObservableObject {
     @Published var isAuthenticated: Bool = false {
         didSet {
             if isAuthenticated {
-                navigateTo(.coinList)
+                showCoinList()
             } else {
                 popToRoot()
-                navigateTo(.login)
             }
         }
     }
-    
-    
+
+
     func initialize(isAuthenticated: Bool) {
         self.isAuthenticated = isAuthenticated
     }
-    
+
     func navigateTo(_ page: AppPage) {
         path.append(page)
     }
-    
+
+    private func showCoinList() {
+        path = NavigationPath()
+        path.append(AppPage.coinList)
+    }
+
     func pop() {
         if !path.isEmpty {
             path.removeLast()
         }
     }
-    
+
     func popToRoot() {
         path = NavigationPath()
     }
-    
+
     func logout() {
         isAuthenticated = false
-        
     }
 }

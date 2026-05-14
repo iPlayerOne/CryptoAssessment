@@ -13,9 +13,16 @@ final class AppContainer: ObservableObject {
     private let appCoordinator = AppCoordinator()
     private let userDefaultsManager = UserDefaultsManagerImpl()
     private let networkService = NetworkServiceImpl()
+    private let authServiceImpl: AuthService
+    private let authStateManagerImpl: AuthStateManager
     private let coinService: CoinService
     
     private init() {
+        self.authServiceImpl = AuthServiceImpl()
+        self.authStateManagerImpl = AuthStateManagerImpl(
+            authService: authServiceImpl,
+            userDefaultsManager: userDefaultsManager
+        )
         self.coinService = CoinServiceImpl(networkService: networkService)
     }
     
@@ -36,15 +43,10 @@ final class AppContainer: ObservableObject {
     }
     
     var authService: AuthService {
-        AuthServiceImpl()
+        authServiceImpl
     }
     
     var authStateManager: AuthStateManager {
-        AuthStateManagerImpl(authService: authService,
-                             userDefaultsManager: userDefaultsManager
-        )
+        authStateManagerImpl
     }
-    
-    
-    
 }

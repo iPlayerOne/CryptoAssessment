@@ -20,14 +20,14 @@ final class ChartViewModel: ObservableObject {
         let startDate = Calendar.current.date(byAdding: .day, value: -7, to: endDate) ?? endDate
         return DateInterval(start: startDate, end: endDate)
     }()
-    
-    
+
+
     var maxRange: DateInterval {
         let endDate = Date()
         let startDate = Calendar.current.date(byAdding: .day, value: -30, to: endDate) ?? endDate
         return DateInterval(start: startDate, end: endDate)
     }
-    
+
     private let coinId: String
     private let coinService: CoinService
     private var chartData: [ChartPoint] = []
@@ -38,14 +38,16 @@ final class ChartViewModel: ObservableObject {
         self.coinId = coinId
         self.coinService = coinService
     }
-    
+
     func loadChart(for days: Int) async {
+        guard chartData.isEmpty else { return }
+
         isLoading = true
         defer { isLoading = false }
         do {
             let rawData = try await coinService.fetchMarketChart(with: coinId, days: days)
             let transformedData = transformToChartPoint(rawData)
-            
+
             self.chartData = transformedData
                 if let firstDate = transformedData.first?.timestamp,
                    let lastDate = transformedData.last?.timestamp {
@@ -54,10 +56,10 @@ final class ChartViewModel: ObservableObject {
                     print("No chart data available")
                 }
         } catch {
-                self.errorMessage = "Failed to fetch chart data: \(error.localizedDescription)"
+                self.errorMessage = error.localizedDescription
         }
     }
-    
+
     func animateData() async {
         guard !isAnimating else { return }
         isAnimating = true
@@ -67,19 +69,19 @@ final class ChartViewModel: ObservableObject {
             isAnimating = false
             return
         }
-        
+
         displayedData = []
         let totalDuration: UInt64 = 1_000_000_000
         let interval = totalDuration / UInt64(filteredData.count)
-        
+
         for point in filteredData {
             displayedData.append(point)
             try? await Task.sleep(nanoseconds: interval)
         }
-        
+
         isAnimating = false
     }
-    
+
     func updateSelectedPoint(at point: CGPoint, in proxy: ChartProxy, chartBounds: CGRect) {
         if let date: Date = proxy.value(atX: point.x),
            let closest = displayedData.min(by: { abs($0.timestamp.timeIntervalSince(date)) < abs($1.timestamp.timeIntervalSince(date)) }) {
@@ -90,11 +92,11 @@ final class ChartViewModel: ObservableObject {
             }
         }
     }
-    
+
     func clearSelection() {
         selectedPoint = nil
     }
-    
+
     func calculateXScale() -> ClosedRange<Date> {
         if selectedRange.start <= selectedRange.end {
             return selectedRange.start ... selectedRange.end
@@ -103,17 +105,17 @@ final class ChartViewModel: ObservableObject {
             return Date()...Date()
         }
     }
-    
+
     func calculateYScale() -> ClosedRange<Double> {
         let prices = chartData.map { $0.price }
         guard let minPrice = prices.min(), let maxPrice = prices.max() else {
             return 0...1
         }
-        
+
         let padding = (maxPrice - minPrice) * 0.1
         return (minPrice - padding)...(maxPrice + padding)
     }
-    
+
     private func transformToChartPoint(_ data: [[Double]]) -> [ChartPoint] {
         return data.compactMap { array in
             guard array.count == 2 else { return nil }
@@ -122,7 +124,7 @@ final class ChartViewModel: ObservableObject {
             return ChartPoint(timestamp: timestamp, price: price)
         }
     }
-    
+
     private func adjustTooltipPosition(position: CGPoint, within bounds: CGRect, padding: CGFloat) -> CGPoint {
         let tooltipWidht: CGFloat = 150
         var adjustedPosition = position
@@ -132,8 +134,8 @@ final class ChartViewModel: ObservableObject {
         } else if adjustedPosition.x + tooltipWidht / 2 > bounds.maxX  {
             adjustedPosition.x = bounds.maxX - tooltipWidht / 2 + padding
         }
-        
+
         return adjustedPosition
     }
-    
+
 }

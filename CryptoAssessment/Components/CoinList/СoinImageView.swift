@@ -11,9 +11,6 @@ struct CoinImageView: View {
     let imageUrl: String
     
     var body: some View {
-//        Image(systemName: "circle.fill")
-//            .resizable()
-//            .frame(width: 40, height: 40)
         if let url = URL(string: imageUrl) {
             AsyncImage(url: url) { phase in
                 switch phase {

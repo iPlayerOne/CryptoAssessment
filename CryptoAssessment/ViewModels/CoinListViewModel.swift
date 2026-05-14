@@ -11,19 +11,19 @@ import Combine
 @MainActor
 final class CoinListViewModel: ObservableObject {
 
-    
+
     @Published var state: State = .loading
     @Published var sortedBy: SortingOption = .nameAscending
     @Published var searchQuery: String = ""
     @Published private(set) var filteredCoins: [CoinListItem] = []
-    
+
     private var allCoins: [CoinListItem] = []
     private var cancellables: Set<AnyCancellable> = []
-    
+
     private let coinService: CoinService
     private let authStateManager: AuthStateManager
     private let coordinator: AppCoordinator
-    
+
     init(
         coinService: CoinService = AppContainer.shared.coins,
         authStateManager: AuthStateManager = AppContainer.shared.authStateManager,
@@ -32,12 +32,17 @@ final class CoinListViewModel: ObservableObject {
         self.coinService = coinService
         self.authStateManager = authStateManager
         self.coordinator = coordinator
-        
+
         setupBindings()
     }
-    
-    
+
+
     func fetchCoins(forceRefresh: Bool = false) async {
+        if !forceRefresh, !allCoins.isEmpty {
+            applyFilters()
+            return
+        }
+
         state = .loading
         do {
             let coins = try await coinService.fetchCoins(forceRefresh: forceRefresh)
@@ -46,10 +51,10 @@ final class CoinListViewModel: ObservableObject {
         } catch is CancellationError {
             print("Task was cancelled")
         } catch {
-            state = .failed("Cant fetch coins: \(error.localizedDescription)")
+            state = .failed(error.localizedDescription)
         }
     }
-    
+
     func sortCoins(_ coins:[CoinListItem], by option: SortingOption) -> [CoinListItem] {
         switch option {
             case .nameAscending:
@@ -66,27 +71,27 @@ final class CoinListViewModel: ObservableObject {
                 return coins.sorted { ($0.percentChange24h ?? 0.0) > ($1.percentChange24h ?? 0.0) }
         }
     }
-    
+
     func changeSortingOption(to option: SortingOption) {
         sortedBy = option
         applyFilters()
     }
-    
+
     func selectCoin(_ coin: CoinListItem) {
         coordinator.navigateTo(.coinDetails(coin: coin))
     }
-    
+
     func logout() {
         authStateManager.logout()
         coordinator.logout()
     }
-    
+
     private func setupBindings() {
         Publishers.CombineLatest($searchQuery, $sortedBy)
             .map { [weak self] searchQuery, sortOption -> [CoinListItem] in
                 guard let self = self else { return [] }
                 var filtered = self.allCoins
-                
+
                 if !searchQuery.isEmpty {
                     filtered = filtered.filter {
                         $0.name.localizedCaseInsensitiveContains(searchQuery)
@@ -101,7 +106,7 @@ final class CoinListViewModel: ObservableObject {
             }
             .store(in: &cancellables)
     }
-    
+
     private func applyFilters() {
         guard !allCoins.isEmpty else {
             filteredCoins = []

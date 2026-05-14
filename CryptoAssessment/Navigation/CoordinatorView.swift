@@ -15,8 +15,6 @@ struct CoordinatorView: View {
             LoginView()
                 .navigationDestination(for: AppPage.self) { page in
                     switch page {
-                        case .login:
-                            LoginView()
                         case .coinList:
                             CoinsListView()
                         case .coinDetails(coin: let coin):

@@ -21,10 +21,10 @@ final class LoginViewModel: ObservableObject {
         }
     }
     @Published var errorMessage: String? = nil
-    
+
     private let authStateManager: AuthStateManager
     private let coordinator: AppCoordinator
-    
+
     init(
         authStateManager: AuthStateManager = AppContainer.shared.authStateManager,
         coordinator: AppCoordinator = AppContainer.shared.coordinator
@@ -32,33 +32,35 @@ final class LoginViewModel: ObservableObject {
         self.authStateManager = authStateManager
         self.coordinator = coordinator
     }
-    
+
     func login() {
         errorMessage = nil
-        
-        if username.isEmpty {
+
+        guard !username.isEmpty else {
             errorMessage = "Username cannot be empty"
+            return
         }
-        if password.isEmpty {
+
+        guard !password.isEmpty else {
             errorMessage = "Password cannot be empty"
+            return
         }
+
         if authStateManager.login(username: username, password: password) {
-            coordinator.navigateTo(.coinList)
+            coordinator.isAuthenticated = true
         } else {
             errorMessage = "Invalid username or password"
         }
     }
-    
+
     func resetState() {
-           username = ""
-           password = ""
-       }
-    
+        username = ""
+        password = ""
+    }
+
     private func clearError() {
         if errorMessage != nil {
             errorMessage = nil
         }
     }
-    
-   
 }
