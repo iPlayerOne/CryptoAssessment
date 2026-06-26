@@ -54,7 +54,6 @@
 COINGECKO_API_KEY=your_api_key_here
 ```
 
-Ключ не нужно коммитить в репозиторий.
 
 ## Данные для входа
 
@@ -65,9 +64,3 @@ username: qwerty
 password: qwerty
 ```
 
-## Запуск
-
-1. Склонировать репозиторий
-2. Открыть `CryptoAssessment.xcodeproj`
-3. При необходимости добавить `COINGECKO_API_KEY`
-4. Запустить проект в Xcode
